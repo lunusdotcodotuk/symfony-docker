@@ -4,7 +4,7 @@ services:
   db:
     image: mysql
     volumes:
-      - database_path:/var/lib/mysql
+      - ${DATABASE_PATH}:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -19,14 +19,14 @@ services:
         TIMEZONE: ${TIMEZONE}
     volumes:
       - ${SYMFONY_APP_PATH}:/var/www/symfony
-      - ./docker-files/logs/symfony:/var/www/symfony/var/log
+      - ${LOG_OUTPUT}/symfony:/var/www/symfony/var/log
   nginx:
     image: nginx
     ports:
       - 80:80
     volumes:
-      - log_output/nginx/:/var/log/nginx
-      - nginx_conf/default.template:/etc/nginx/conf.d/default.template
+      - ${LOG_OUTPUT}/nginx/:/var/log/nginx
+      - ${NGINX_CONF}/default.template:/etc/nginx/conf.d/default.template
     environment:
       - NGINX_HOST=${NGINX_HOST}
     command: /bin/sh -c "envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
@@ -35,11 +35,5 @@ services:
     ports:
       - ${ELK_PORT}:80
     volumes:
-      - log_output:/etc/logstash
-      - log_output/patterns:/opt/logstash/patterns
-volumes:
-  symfony_app: ${SYMFONY_APP_PATH}
-  elk_logstash_conf: ${ELK_LOGSTASH_CONF}
-  nginx_conf: ${NGINX_CONF}
-  log_output: ${LOG_OUTPUT}
-  database_path: ${DATABASE_PATH}
+      - ${LOG_OUTPUT}:/etc/logstash
+      - ${LOG_OUTPUT}/patterns:/opt/logstash/patterns
